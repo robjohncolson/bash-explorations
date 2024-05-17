@@ -1,0 +1,193 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"><title>Colorizing Scripts</title><meta name="GENERATOR" content="Modular DocBook HTML Stylesheet Version 1.7"><link rel="HOME" title="Advanced Bash-Scripting Guide" href="https://www.ing.iac.es/~docs/external/bash/abs-guide/index.html"><link rel="UP" title="Miscellany" href="https://www.ing.iac.es/~docs/external/bash/abs-guide/miscellany.html"><link rel="PREVIOUS" title="Recursion" href="https://www.ing.iac.es/~docs/external/bash/abs-guide/recursionsct.html"><link rel="NEXT" title="Optimizations" href="https://www.ing.iac.es/~docs/external/bash/abs-guide/optimizations.html"></head><body class="SECT1" vlink="#840084" text="#000000" link="#0000FF" bgcolor="#FFFFFF" alink="#0000FF"><div class="NAVHEADER"><table summary="Header navigation table" width="100%" cellspacing="0" cellpadding="0" border="0"><tbody><tr><th colspan="3" align="center">Advanced Bash-Scripting Guide: </th></tr><tr><td width="10%" valign="bottom" align="left"><a href="https://www.ing.iac.es/~docs/external/bash/abs-guide/recursionsct.html" accesskey="P">Prev</a></td><td width="80%" valign="bottom" align="center">Chapter 34. Miscellany</td><td width="10%" valign="bottom" align="right"><a href="https://www.ing.iac.es/~docs/external/bash/abs-guide/optimizations.html" accesskey="N">Next</a></td></tr></tbody></table><hr width="100%" align="LEFT"></div><div class="SECT1"><h1 class="SECT1"><a name="COLORIZING"></a>34.5. <span class="QUOTE">"Colorizing"</span> Scripts</h1><p><a name="COLORIZINGREF"></a></p><p>The ANSI
+	   <a name="AEN14379" href="#FTN.AEN14379"><span class="footnote">[1]</span></a>
+	   escape sequences set screen attributes, such as bold
+	   text, and color of foreground and background. <a href="https://www.ing.iac.es/~docs/external/bash/abs-guide/dosbatch.html#DOSBATCH1">DOS batch files</a> commonly used
+	   ANSI escape codes for <em>color</em> output,
+	   and so can Bash scripts.</p><div class="EXAMPLE"><a name="EX30A"></a><p><b>Example 34-9. A <span class="QUOTE">"colorized"</span> address database</b></p><table width="100%" border="0" bgcolor="#E0E0E0"><tbody><tr><td><font color="#000000"><pre class="PROGRAMLISTING">#!/bin/bash
+# ex30a.sh: "Colorized" version of ex30.sh.
+#            Crude address database
+
+
+clear                                   # Clear the screen.
+
+echo -n "          "
+echo -e '\E[37;44m'"\033[1mContact List\033[0m"
+                                        # White on blue background
+echo; echo
+echo -e "\033[1mChoose one of the following persons:\033[0m"
+                                        # Bold
+tput sgr0
+echo "(Enter only the first letter of name.)"
+echo
+echo -en '\E[47;34m'"\033[1mE\033[0m"   # Blue
+tput sgr0                               # Reset colors to "normal."
+echo "vans, Roland"                     # "[E]vans, Roland"
+echo -en '\E[47;35m'"\033[1mJ\033[0m"   # Magenta
+tput sgr0
+echo "ones, Mildred"
+echo -en '\E[47;32m'"\033[1mS\033[0m"   # Green
+tput sgr0
+echo "mith, Julie"
+echo -en '\E[47;31m'"\033[1mZ\033[0m"   # Red
+tput sgr0
+echo "ane, Morris"
+echo
+
+read person
+
+case "$person" in
+# Note variable is quoted.
+
+  "E" | "e" )
+  # Accept upper or lowercase input.
+  echo
+  echo "Roland Evans"
+  echo "4321 Floppy Dr."
+  echo "Hardscrabble, CO 80753"
+  echo "(303) 734-9874"
+  echo "(303) 734-9892 fax"
+  echo "revans@zzy.net"
+  echo "Business partner &amp; old friend"
+  ;;
+
+  "J" | "j" )
+  echo
+  echo "Mildred Jones"
+  echo "249 E. 7th St., Apt. 19"
+  echo "New York, NY 10009"
+  echo "(212) 533-2814"
+  echo "(212) 533-9972 fax"
+  echo "milliej@loisaida.com"
+  echo "Girlfriend"
+  echo "Birthday: Feb. 11"
+  ;;
+
+# Add info for Smith &amp; Zane later.
+
+          * )
+   # Default option.	  
+   # Empty input (hitting RETURN) fits here, too.
+   echo
+   echo "Not yet in database."
+  ;;
+
+esac
+
+tput sgr0                               # Reset colors to "normal."
+
+echo
+
+exit 0</pre></font></td></tr></tbody></table></div><p>The simplest, and perhaps most useful ANSI escape sequence is
+	  bold text, <b class="COMMAND">\033[1m ... \033[0m</b>. The
+	  <span class="TOKEN">\033</span> represents an <em>escape</em>,
+	  the <span class="QUOTE">"[1"</span> turns on the bold attribute, while the
+	  <span class="QUOTE">"[0"</span> switches it off. The <span class="QUOTE">"m"</span> terminates
+	  each term of the escape sequence.
+	      <table width="100%" border="1" bgcolor="#E0E0E0"><tbody><tr><td><font color="#000000"><pre class="SCREEN"><tt class="PROMPT">bash$ </tt><tt class="USERINPUT"><b>echo -e "\033[1mThis is bold text.\033[0m"</b></tt>
+	      </pre></font></td></tr></tbody></table>
+	</p><p>A similar escape sequence switches on the underline
+	  attribute (on an <em>rxvt</em> and and an
+	  <em>aterm</em>).
+	      <table width="100%" border="1" bgcolor="#E0E0E0"><tbody><tr><td><font color="#000000"><pre class="SCREEN"><tt class="PROMPT">bash$ </tt><tt class="USERINPUT"><b>echo -e "\033[4mThis is underlined text.\033[0m"</b></tt>
+	      </pre></font></td></tr></tbody></table>
+	</p><div class="NOTE"><p></p><table class="NOTE" width="100%" border="0"><tbody><tr><td width="25" valign="TOP" align="CENTER"><img src="Colorizing%20Scripts_files/note.gif" alt="Note" hspace="5"></td><td valign="TOP" align="LEFT"><p>With an <b class="COMMAND">echo</b>, the
+	  <tt class="OPTION">-e</tt> option enables the escape
+	  sequences.</p></td></tr></tbody></table></div><p>Other escape sequences change the text and/or background color.  
+	      <table width="100%" border="1" bgcolor="#E0E0E0"><tbody><tr><td><font color="#000000"><pre class="SCREEN"><tt class="PROMPT">bash$ </tt><tt class="USERINPUT"><b>echo -e '\E[34;47mThis prints in blue.'; tput sgr0</b></tt>
+
+
+<tt class="PROMPT">bash$ </tt><tt class="USERINPUT"><b>echo -e '\E[33;44m'"yellow text on blue background"; tput sgr0</b></tt>
+	      </pre></font></td></tr></tbody></table>
+	      The <b class="COMMAND">tput sgr0</b> restores the terminal settings
+	      to normal. Omitting this lets all subsequent output from that
+	      particular terminal remain blue.</p><table class="SIDEBAR" cellpadding="5" border="1"><tbody><tr><td><div class="SIDEBAR"><a name="AEN14414"></a><p></p><p>Use the following template for writing colored text on a colored
+	background.</p><p>	  <tt class="USERINPUT"><b>echo -e '\E[COLOR1;COLOR2mSome text goes here.'</b></tt>
+        </p><p>The <span class="QUOTE">"\E["</span> begins the escape sequence.
+	  The semicolon-separated numbers <span class="QUOTE">"COLOR1"</span> and
+	  <span class="QUOTE">"COLOR2"</span> specify a foreground and a background
+	  color, according to the table below. (The order of the
+	  numbers does not matter, since the foreground and background
+	  numbers fall in non-overlapping ranges.) The <span class="QUOTE">"m"</span>
+	  terminates the escape sequence, and the text begins immediately
+	  after that.</p><p>Note also that <a href="https://www.ing.iac.es/~docs/external/bash/abs-guide/varsubn.html#SNGLQUO">single quotes</a>
+	  enclose the remainder of the command sequence following the
+	  <b class="COMMAND">echo -e</b>.</p><p></p></div></td></tr></tbody></table><p>The numbers in the following table work for an
+	  <em>rxvt</em> terminal. Results may vary for other
+	  terminal emulators.</p><div class="TABLE"><a name="AEN14428"></a><p><b>Table 34-1. Numbers representing colors in Escape Sequences</b></p><table class="CALSTABLE" border="1"><thead><tr><th valign="TOP" align="LEFT">Color</th><th valign="TOP" align="LEFT">Foreground</th><th valign="TOP" align="LEFT">Background</th></tr></thead><tbody><tr><td valign="TOP" align="LEFT"><tt class="OPTION">black</tt></td><td valign="TOP" align="LEFT">30</td><td valign="TOP" align="LEFT">40</td></tr><tr><td valign="TOP" align="LEFT"><tt class="OPTION">red</tt></td><td valign="TOP" align="LEFT">31</td><td valign="TOP" align="LEFT">41</td></tr><tr><td valign="TOP" align="LEFT"><tt class="OPTION">green</tt></td><td valign="TOP" align="LEFT">32</td><td valign="TOP" align="LEFT">42</td></tr><tr><td valign="TOP" align="LEFT"><tt class="OPTION">yellow</tt></td><td valign="TOP" align="LEFT">33</td><td valign="TOP" align="LEFT">43</td></tr><tr><td valign="TOP" align="LEFT"><tt class="OPTION">blue</tt></td><td valign="TOP" align="LEFT">34</td><td valign="TOP" align="LEFT">44</td></tr><tr><td valign="TOP" align="LEFT"><tt class="OPTION">magenta</tt></td><td valign="TOP" align="LEFT">35</td><td valign="TOP" align="LEFT">45</td></tr><tr><td valign="TOP" align="LEFT"><tt class="OPTION">cyan</tt></td><td valign="TOP" align="LEFT">36</td><td valign="TOP" align="LEFT">46</td></tr><tr><td valign="TOP" align="LEFT"><tt class="OPTION">white</tt></td><td valign="TOP" align="LEFT">37</td><td valign="TOP" align="LEFT">47</td></tr></tbody></table></div><div class="EXAMPLE"><a name="COLORECHO"></a><p><b>Example 34-10. Echoing colored text</b></p><table width="100%" border="0" bgcolor="#E0E0E0"><tbody><tr><td><font color="#000000"><pre class="PROGRAMLISTING">#!/bin/bash
+# color-echo.sh: Echoing text messages in color.
+
+# Modify this script for your own purposes.
+# It's easier than hand-coding color.
+
+black='\E[30;47m'
+red='\E[31;47m'
+green='\E[32;47m'
+yellow='\E[33;47m'
+blue='\E[34;47m'
+magenta='\E[35;47m'
+cyan='\E[36;47m'
+white='\E[37;47m'
+
+
+alias Reset="tput sgr0"      #  Reset text attributes to normal
+                             #+ without clearing screen.
+
+
+cecho ()                     # Color-echo.
+                             # Argument $1 = message
+                             # Argument $2 = color
+{
+local default_msg="No message passed."
+                             # Doesn't really need to be a local variable.
+
+message=${1:-$default_msg}   # Defaults to default message.
+color=${2:-$black}           # Defaults to black, if not specified.
+
+  echo -e "$color"
+  echo "$message"
+  Reset                      # Reset to normal.
+
+  return
+}  
+
+
+# Now, let's try it out.
+# ----------------------------------------------------
+cecho "Feeling blue..." $blue
+cecho "Magenta looks more like purple." $magenta
+cecho "Green with envy." $green
+cecho "Seeing red?" $red
+cecho "Cyan, more familiarly known as aqua." $cyan
+cecho "No color passed (defaults to black)."
+       # Missing $color argument.
+cecho "\"Empty\" color passed (defaults to black)." ""
+       # Empty $color argument.
+cecho
+       # Missing $message and $color arguments.
+cecho "" ""
+       # Empty $message and $color arguments.
+# ----------------------------------------------------
+
+echo
+
+exit 0
+
+# Exercises:
+# ---------
+# 1) Add the "bold" attribute to the 'cecho ()' function.
+# 2) Add options for colored backgrounds.</pre></font></td></tr></tbody></table></div><div class="CAUTION"><p></p><table class="CAUTION" width="100%" border="0"><tbody><tr><td width="25" valign="TOP" align="CENTER"><img src="Colorizing%20Scripts_files/caution.gif" alt="Caution" hspace="5"></td><td valign="TOP" align="LEFT"><p>There is, however, a major problem with all
+	  this. <em>ANSI escape sequences are emphatically
+	  non-portable.</em> What works fine on some terminal
+	  emulators (or the console) may work differently, or not
+	  at all, on others. A <span class="QUOTE">"colorized"</span> script that
+	  looks stunning on the script author's machine may produce
+	  unreadable output on someone else's. This greatly compromises
+	  the usefulness of <span class="QUOTE">"colorizing"</span> scripts, and
+	  possibly relegates this technique to the status of a gimmick
+	  or even a <span class="QUOTE">"toy"</span>.</p></td></tr></tbody></table></div><p>Moshe Jacobson's <b class="COMMAND">color</b> utility  
+	  (<a href="http://runslinux.net/projects/color" target="_top">http://runslinux.net/projects/color</a>)
+	  considerably simplifies using ANSI escape sequences. It
+	  substitutes a clean and logical syntax for the clumsy constructs
+	  just discussed.</p></div><h3 class="FOOTNOTES">Notes</h3><table class="FOOTNOTES" width="100%" border="0"><tbody><tr><td width="5%" valign="TOP" align="LEFT"><a name="FTN.AEN14379" href="https://www.ing.iac.es/~docs/external/bash/abs-guide/colorizing.html#AEN14379"><span class="footnote">[1]</span></a></td><td width="95%" valign="TOP" align="LEFT"><p>ANSI is, of course, the acronym for the American
+	     National Standards Institute.</p></td></tr></tbody></table><div class="NAVFOOTER"><hr width="100%" align="LEFT"><table summary="Footer navigation table" width="100%" cellspacing="0" cellpadding="0" border="0"><tbody><tr><td width="33%" valign="top" align="left"><a href="https://www.ing.iac.es/~docs/external/bash/abs-guide/recursionsct.html" accesskey="P">Prev</a></td><td width="34%" valign="top" align="center"><a href="https://www.ing.iac.es/~docs/external/bash/abs-guide/index.html" accesskey="H">Home</a></td><td width="33%" valign="top" align="right"><a href="https://www.ing.iac.es/~docs/external/bash/abs-guide/optimizations.html" accesskey="N">Next</a></td></tr><tr><td width="33%" valign="top" align="left">Recursion</td><td width="34%" valign="top" align="center"><a href="https://www.ing.iac.es/~docs/external/bash/abs-guide/miscellany.html" accesskey="U">Up</a></td><td width="33%" valign="top" align="right">Optimizations</td></tr></tbody></table></div></body></html>
