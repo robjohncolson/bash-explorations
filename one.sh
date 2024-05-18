@@ -2,6 +2,41 @@
 #bash ansi escape sequences: https://www.ing.iac.es/~docs/external/bash/abs-guide/colorizing.html
 #
 
+function get_efi_label {
+
+clear
+read -p "After you press enter, BLKID will run.  Copy or remember the PARTUUID or PARTLABEL that corresponds with where you want to create the EFI partition."
+clear
+echo $'\n'
+		blkid
+	echo $'\n'
+	echo -n "enter partition label for EFI: "
+	read efilabel
+	clear
+	result=$(blkid | grep $efilabel)
+	echo $result | grep -w -q $efilabel
+	if [ $? -lt 1 ]; then
+echo -en '\E[47;31m'"\033[1mMATCH\033[0m"   # Red
+tput sgr0
+	else
+echo -e '\E[37;44m'"\033[1mNO MATCH\033[0m"
+tput sgr0
+fi
+	echo $'\n'
+	echo -n "satisfied with output of blkid? [Y/N] "
+	read YN
+	re=[Nn]
+
+		if [[ "$YN" =~ $re ]]; then
+		exit
+	else
+		echo "YES?!?!"
+	fi
+
+	read -p "press enter if satisfied with output"
+}
+
+
 function get_root_label {
 
 	clear
@@ -34,10 +69,15 @@ fi
 	fi
 
 	read -p "press enter if satisfied with output"
-	return 55
 }
 
 get_root_label
+echo $rootlabel
+	read -p "press enter if satisfied with output"
+get_efi_label
+echo $efilabel
+	read -p "press enter if satisfied with output"
+exit
 re=$?
 
 if [[ $re =~ ^[0-9]+$ ]]; then
